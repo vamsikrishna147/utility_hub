@@ -1,0 +1,7 @@
+{
+  "name": "utility-hub-backend",
+  "version": "1.0.0",
+  "description": "Backend proxy for Utility Hub to securely call the Gemini API.",
+  "private": true
+}
+

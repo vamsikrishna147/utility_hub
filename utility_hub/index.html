@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All-in-One Utility Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            --bg-gradient-start: #89f7fe;
+            --bg-gradient-end: #66a6ff;
+            --glow-1: #89f7fe;
+            --glow-2: #d4a6ff;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.25);
+            --card-border: rgba(255, 255, 255, 0.4);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --input-border: rgba(255, 255, 255, 0.3);
+            --input-focus-shadow: rgba(255, 255, 255, 0.6);
+            --btn-primary-start: #a881ff;
+            --btn-primary-end: #ff75ac;
+            --result-panel-bg: rgba(0, 0, 0, 0.25);
+            --history-item-bg: rgba(255, 255, 255, 0.05);
+            --nav-button-active-bg: rgba(255, 255, 255, 0.4);
+            --nav-button-hover-bg: rgba(255, 255, 255, 0.2);
+            --text-color-primary-for-body: #ffffff;
+        }
+
+        html.dark {
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #1e293b;
+            --glow-1: #1e40af;
+            --glow-2: #5b21b6;
+            --text-primary: #e2e8f0;
+            --text-secondary: rgba(226, 232, 240, 0.7);
+            --card-bg: rgba(30, 41, 59, 0.5);
+            --card-border: rgba(71, 85, 105, 0.6);
+            --input-bg: rgba(15, 23, 42, 0.5);
+            --input-border: rgba(51, 65, 85, 1);
+            --input-focus-shadow: rgba(99, 102, 241, 0.6);
+            --btn-primary-start: #4f46e5;
+            --btn-primary-end: #7c3aed;
+            --result-panel-bg: rgba(0, 0, 0, 0.4);
+            --history-item-bg: rgba(51, 65, 85, 0.5);
+            --nav-button-active-bg: rgba(79, 70, 229, 0.6);
+            --nav-button-hover-bg: rgba(51, 65, 85, 0.5);
+            --text-color-primary-for-body: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-color-primary-for-body);
+            overflow-x: hidden;
+            transition: background 0.5s ease;
+        }
+
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            z-index: -1;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.6;
+            transition: background 0.5s ease;
+        }
+        body::before {
+            background: var(--glow-1);
+            width: 50vw; height: 50vw; max-width: 500px; max-height: 500px; top: -10vh; left: -15vw;
+        }
+        body::after {
+            background: var(--glow-2);
+            width: 60vw; height: 60vw; max-width: 600px; max-height: 600px; bottom: -15vh; right: -10vw;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 24px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 12px 32px 0 rgba(31, 38, 135, 0.25);
+            transition: background 0.3s ease, border 0.3s ease;
+        }
+
+        .main-container { width: 100%; max-width: 768px; margin: 2rem auto; padding: 0 1rem; }
+        .sticky-nav { position: sticky; top: 20px; z-index: 50; padding: 0.75rem; }
+        .nav-button {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-button.active {
+            background-color: var(--nav-button-active-bg);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .nav-button:hover:not(.active) {
+            background-color: var(--nav-button-hover-bg);
+            transform: translateY(-2px);
+        }
+
+        .tool-card { display: none; animation: fadeIn 0.6s ease-in-out; }
+        .tool-card.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-input {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-size: 1.125rem;
+            padding: 0.875rem;
+        }
+        .form-input::placeholder { color: var(--text-secondary); opacity: 0.7; }
+        .form-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--input-focus-shadow);
+        }
+        
+        .form-select {
+            -webkit-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.5em;
+        }
+        .form-input option { background: #66a6ff; color: #fff; }
+        html.dark .form-input option { background: #1e293b; color: #e2e8f0; }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--btn-primary-start) 0%, var(--btn-primary-end) 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            padding-top: 1rem; padding-bottom: 1rem; font-size: 1.125rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+        .primary-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            filter: brightness(1.1);
+        }
+
+        .ai-feature-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            padding: 0.875rem;
+            animation: pulse-glow 2.5s infinite ease-in-out;
+        }
+        html.dark .ai-feature-btn {
+            background: rgba(51, 65, 85, 0.5);
+            border-color: rgba(71, 85, 105, 0.6);
+        }
+        .ai-feature-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.02);
+        }
+        html.dark .ai-feature-btn:hover {
+             background: rgba(71, 85, 105, 0.7);
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px rgba(255,255,255,0.2); }
+            50% { box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+            100% { box-shadow: 0 0 5px rgba(255,255,255,0.2); }
+        }
+        html.dark @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px rgba(79, 70, 229, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(79, 70, 229, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(79, 70, 229, 0.3); }
+        }
+
+        .mood-emoji {
+            transition: all 0.3s ease;
+            filter: grayscale(80%) saturate(0.5);
+            opacity: 0.6;
+        }
+        .mood-emoji:hover {
+            transform: scale(1.25) rotate(-5deg);
+            filter: grayscale(0%) saturate(1);
+            opacity: 1;
+        }
+        .mood-emoji.selected {
+            transform: scale(1.2); filter: grayscale(0%) saturate(1.2); opacity: 1;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+        
+        .result-panel {
+            background: var(--result-panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        
+        @keyframes popIn {
+             from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); }
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            width: 24px; height: 24px; border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
+        html.dark ::-webkit-scrollbar-track { background: var(--bg-gradient-end); }
+        html.dark ::-webkit-scrollbar-thumb { background: #4a5568; }
+
+        .theme-toggle-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+        }
+    </style>
+</head>
+<body class="">
+
+    <div class="main-container">
+        <header class="text-center p-8 relative">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-shadow">Utility Hub</h1>
+            <p class="text-secondary mt-2 text-lg">Modern Tools, Supercharged with AI.</p>
+            
+            <!-- Theme Toggle Button -->
+            <button id="theme-toggle" class="absolute top-8 right-4 md:right-0 p-2 rounded-full theme-toggle-btn transition-colors">
+                <i data-lucide="sun" id="theme-icon-light" class="w-6 h-6 text-yellow-300"></i>
+                <i data-lucide="moon" id="theme-icon-dark" class="w-6 h-6 text-indigo-300"></i>
+            </button>
+        </header>
+
+        <!-- Sticky Navigation -->
+        <nav class="sticky-nav glass-card flex justify-center items-center space-x-1 sm:space-x-2">
+            <button onclick="switchTab('bmi')" class="nav-button active flex-1 flex flex-col sm:flex-row items-center justify-center space-x-0 sm:space-x-2 p-3 rounded-xl text-xs sm:text-base font-semibold">
+                <i data-lucide="heart-pulse" class="w-6 h-6 mb-1 sm:mb-0"></i>
+                <span>BMI</span>
+            </button>
+            <button onclick="switchTab('mood')" class="nav-button flex-1 flex flex-col sm:flex-row items-center justify-center space-x-0 sm:space-x-2 p-3 rounded-xl text-xs sm:text-base font-semibold">
+                <i data-lucide="smile-plus" class="w-6 h-6 mb-1 sm:mb-0"></i>
+                <span>Mood</span>
+            </button>
+            <button onclick="switchTab('nutrition')" class="nav-button flex-1 flex flex-col sm:flex-row items-center justify-center space-x-0 sm:space-x-2 p-3 rounded-xl text-xs sm:text-base font-semibold">
+                <i data-lucide="chef-hat" class="w-6 h-6 mb-1 sm:mb-0"></i>
+                <span>Recipe AI</span>
+            </button>
+            <button onclick="switchTab('converter')" class="nav-button flex-1 flex flex-col sm:flex-row items-center justify-center space-x-0 sm:space-x-2 p-3 rounded-xl text-xs sm:text-base font-semibold">
+                <i data-lucide="scale-3d" class="w-6 h-6 mb-1 sm:mb-0"></i>
+                <span>Converter</span>
+            </button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="mt-8">
+            <!-- BMI Calculator -->
+            <div id="bmi-card" class="tool-card active glass-card p-6 md:p-8">
+                <div class="flex items-center space-x-4 mb-6">
+                    <i data-lucide="heart-pulse" class="w-10 h-10 text-pink-300"></i>
+                    <h2 class="text-3xl font-semibold">BMI Calculator</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="height-cm" class="block text-base font-medium text-secondary mb-2">Height (cm)</label>
+                        <input type="number" id="height-cm" placeholder="e.g., 175" class="w-full form-input rounded-xl">
+                    </div>
+                    <div>
+                        <label for="weight-kg" class="block text-base font-medium text-secondary mb-2">Weight (kg)</label>
+                        <input type="number" id="weight-kg" placeholder="e.g., 70" class="w-full form-input rounded-xl">
+                    </div>
+                </div>
+                <button onclick="calculateBMI()" class="mt-8 w-full primary-btn font-bold rounded-xl">Calculate BMI</button>
+                <div id="bmi-result" class="mt-6 hidden"></div>
+                <div id="bmi-gemini" class="mt-6 hidden">
+                    <button id="bmi-gemini-button" onclick="getHealthTips()" class="w-full ai-feature-btn font-semibold rounded-xl transition-colors flex items-center justify-center space-x-3 text-lg">
+                        <span>✨</span>
+                        <span>Get Personalized Health Tips</span>
+                    </button>
+                    <div id="bmi-gemini-result" class="mt-4 text-left p-4 rounded-lg hidden bg-black/20 text-secondary"></div>
+                </div>
+            </div>
+
+            <!-- Daily Mood Tracker -->
+            <div id="mood-card" class="tool-card glass-card p-6 md:p-8">
+                <div class="flex items-center space-x-4 mb-2">
+                    <i data-lucide="smile-plus" class="w-10 h-10 text-yellow-300"></i>
+                    <h2 class="text-3xl font-semibold">Daily Mood Tracker</h2>
+                </div>
+                <p id="mood-date" class="text-secondary mb-6 text-lg"></p>
+                <div id="mood-selector" class="flex justify-around items-center my-6">
+                    <span onclick="trackMood('😄', this)" class="mood-emoji cursor-pointer text-6xl">😄</span>
+                    <span onclick="trackMood('😊', this)" class="mood-emoji cursor-pointer text-6xl">😊</span>
+                    <span onclick="trackMood('😐', this)" class="mood-emoji cursor-pointer text-6xl">😐</span>
+                    <span onclick="trackMood('😟', this)" class="mood-emoji cursor-pointer text-6xl">😟</span>
+                    <span onclick="trackMood('😠', this)" class="mood-emoji cursor-pointer text-6xl">😠</span>
+                </div>
+                 <div id="mood-result" class="mt-8 hidden"></div>
+                 <div id="mood-gemini" class="mt-6 hidden">
+                    <button id="mood-gemini-button" onclick="getMindfulQuote()" class="w-full ai-feature-btn font-semibold rounded-xl transition-colors flex items-center justify-center space-x-3 text-lg">
+                        <span>✨</span>
+                        <span>Get a Mindful Reflection</span>
+                    </button>
+                    <div id="mood-gemini-result" class="mt-4 text-center p-4 rounded-lg hidden bg-black/20 text-secondary italic text-base"></div>
+                </div>
+                <div class="mt-8 border-t border-white/20 pt-6">
+                    <h3 class="font-semibold text-xl mb-3">Recent Moods</h3>
+                    <div id="mood-history" class="text-base text-secondary space-y-3">Your history will appear here.</div>
+                </div>
+            </div>
+
+            <!-- Recipe AI -->
+            <div id="nutrition-card" class="tool-card glass-card p-6 md:p-8">
+                 <div class="flex items-center space-x-4 mb-6">
+                    <i data-lucide="chef-hat" class="w-10 h-10 text-green-300"></i>
+                    <h2 class="text-3xl font-semibold">Recipe AI</h2>
+                </div>
+                <label for="ingredients-text" class="block text-base font-medium text-secondary mb-2">What ingredients do you have?</label>
+                <textarea id="ingredients-text" rows="4" placeholder="e.g., chicken breast, rice, broccoli, olive oil" class="w-full p-3 form-input rounded-xl"></textarea>
+                <button id="recipe-gemini-button" onclick="generateRecipe()" class="mt-6 w-full primary-btn font-bold rounded-xl flex items-center justify-center space-x-2">
+                   <span>✨ Generate Recipe</span>
+                </button>
+                <div id="recipe-gemini-result" class="mt-6 text-left p-5 rounded-xl hidden bg-black/20 text-secondary prose prose-invert"></div>
+            </div>
+
+            <!-- Unit Converter -->
+            <div id="converter-card" class="tool-card glass-card p-6 md:p-8">
+                <div class="flex items-center space-x-4 mb-6">
+                    <i data-lucide="scale-3d" class="w-10 h-10 text-blue-300"></i>
+                    <h2 class="text-3xl font-semibold">Unit Converter</h2>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <label for="conversion-type" class="block text-base font-medium text-secondary mb-2">Conversion Type</label>
+                        <select id="conversion-type" onchange="updateConverter()" class="w-full p-3 form-input form-select rounded-xl"></select>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-1">
+                            <label for="from-unit" class="block text-base font-medium text-secondary mb-2">From</label>
+                            <input type="number" id="input-value" oninput="convertUnits()" placeholder="0" class="w-full form-input rounded-xl">
+                            <select id="from-unit" onchange="convertUnits()" class="w-full p-2 form-input form-select rounded-lg mt-2 text-sm"></select>
+                        </div>
+                        <div class="pt-10">
+                            <i data-lucide="arrow-right-left" class="w-8 h-8 text-secondary"></i>
+                        </div>
+                        <div class="flex-1">
+                             <label for="to-unit" class="block text-base font-medium text-secondary mb-2">To</label>
+                             <div id="converter-result" class="w-full h-[60px] flex items-center justify-center p-3 bg-black/20 font-bold text-2xl rounded-xl">0.00</div>
+                            <select id="to-unit" onchange="convertUnits()" class="w-full p-2 form-input form-select rounded-lg mt-2 text-sm"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- THEME SWITCHER LOGIC ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+        const lightIcon = document.getElementById('theme-icon-light');
+        const darkIcon = document.getElementById('theme-icon-dark');
+
+        // Function to set the theme
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                htmlEl.classList.add('dark');
+                lightIcon.style.display = 'none';
+                darkIcon.style.display = 'block';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                htmlEl.classList.remove('dark');
+                lightIcon.style.display = 'block';
+                darkIcon.style.display = 'none';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        
+        // Event listener for the toggle button
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlEl.classList.contains('dark') ? 'light' : 'dark';
+            setTheme(currentTheme);
+        });
+
+        // Check for saved theme on initial load
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+        
+        // --- State Variables ---
+        let currentBmiCategory = '';
+        let currentMood = '';
+
+        // --- Gemini API Call Logic (Points to Secure Backend) ---
+        const API_URL = `/api/generate`;
+        
+        async function callGemini(prompt, button, resultDiv) {
+            const originalButtonContent = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = `<div class="spinner"></div><span class="ml-2">Generating...</span>`;
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = '<p class="text-secondary text-center">AI is thinking...</p>';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt }) 
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `API Error: ${response.status}`);
+                }
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) {
+                    let html = text
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/^\* (.*$)/mg, '<li class="ml-4 list-disc">$1</li>');
+                    html = html.replace(/<li/g, '<ul class="space-y-2"><li').replace(/<\/li>(?!<li)/g, '</li></ul>');
+                    html = html.replace(/\n/g, '<br>');
+                    resultDiv.innerHTML = html;
+                } else { throw new Error("Couldn't generate a valid response from AI."); }
+            } catch (error) {
+                console.error("API call failed:", error);
+                resultDiv.innerHTML = `<p class="text-red-400 text-center">An error occurred: ${error.message}</p>`;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalButtonContent;
+            }
+        }
+        
+        // --- Tab Switching Logic ---
+        function switchTab(tab) {
+            document.querySelectorAll('.tool-card').forEach(card => card.classList.remove('active'));
+            document.getElementById(`${tab}-card`).classList.add('active');
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`button[onclick="switchTab('${tab}')"]`).classList.add('active');
+        }
+
+        // --- BMI Calculator Logic ---
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById('height-cm').value);
+            const weight = parseFloat(document.getElementById('weight-kg').value);
+            const resultDiv = document.getElementById('bmi-result');
+            const geminiDiv = document.getElementById('bmi-gemini');
+            if (height > 0 && weight > 0) {
+                const bmi = (weight / ((height / 100) ** 2)).toFixed(1);
+                let category = '', color = '';
+                if (bmi < 18.5) { category = 'Underweight'; color = 'text-blue-300'; } 
+                else if (bmi < 25) { category = 'Normal weight'; color = 'text-green-300'; } 
+                else if (bmi < 30) { category = 'Overweight'; color = 'text-yellow-300'; } 
+                else { category = 'Obesity'; color = 'text-red-400'; }
+                currentBmiCategory = category;
+                resultDiv.innerHTML = `
+                    <div class="result-panel p-5 rounded-xl text-center">
+                        <p class="text-lg text-secondary">Your BMI is</p>
+                        <p class="text-5xl font-bold my-2">${bmi}</p>
+                        <p class="text-xl font-semibold ${color}">${category}</p>
+                    </div>`;
+                resultDiv.classList.remove('hidden');
+                geminiDiv.classList.remove('hidden');
+                 document.getElementById('bmi-gemini-result').classList.add('hidden');
+            } else {
+                resultDiv.innerHTML = `<p class="text-center text-red-400">Please enter valid height and weight.</p>`;
+                resultDiv.classList.remove('hidden');
+                geminiDiv.classList.add('hidden');
+            }
+        }
+
+        // --- Mood Tracker Logic ---
+        function trackMood(mood, element) {
+            currentMood = mood;
+            document.querySelectorAll('.mood-emoji').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            const resultDiv = document.getElementById('mood-result');
+            resultDiv.innerHTML = `
+                <div class="result-panel p-4 rounded-xl text-center">
+                    <p class="text-secondary text-lg">You're feeling ${mood} today. That's noted!</p>
+                </div>`;
+            resultDiv.classList.remove('hidden');
+            document.getElementById('mood-gemini').classList.remove('hidden');
+            document.getElementById('mood-gemini-result').classList.add('hidden');
+            const today = new Date().toISOString().split('T')[0];
+            let moods = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+            moods[today] = mood;
+            localStorage.setItem('moodHistory', JSON.stringify(moods));
+            loadMoodHistory();
+        }
+
+        function loadMoodHistory() {
+            const historyDiv = document.getElementById('mood-history');
+            let moods = JSON.parse(localStorage.getItem('moodHistory') || '{}');
+            const sortedDates = Object.keys(moods).sort((a,b) => new Date(b) - new Date(a)).slice(0, 5);
+            if (sortedDates.length === 0) {
+                historyDiv.innerHTML = 'Your recent moods will appear here.';
+                return;
+            }
+            historyDiv.innerHTML = sortedDates.map(date => `
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-lg">
+                    <span>${new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
+                    <span class="text-2xl">${moods[date]}</span>
+                </div>
+            `).join('');
+        }
+
+        // --- AI Prompt Functions ---
+        function getHealthTips() {
+            const prompt = `Act as a helpful and encouraging health assistant. My BMI category is "${currentBmiCategory}". Provide 3 simple, positive, and actionable health tips for someone in this category. Use a friendly tone. Format the tips as a simple list using asterisks.`;
+            callGemini(prompt, document.getElementById('bmi-gemini-button'), document.getElementById('bmi-gemini-result'));
+        }
+        function getMindfulQuote() {
+            let moodDescription = '';
+            switch(currentMood) {
+                case '😄': moodDescription = 'very happy'; break;
+                case '😊': moodDescription = 'content and smiling'; break;
+                case '😐': moodDescription = 'neutral or okay'; break;
+                case '😟': moodDescription = 'a bit worried or sad'; break;
+                case '😠': moodDescription = 'angry or frustrated'; break;
+            }
+            const prompt = `I am feeling ${moodDescription} today (${currentMood}). Give me a short, single, mindful and positive quote or reflection (just one or two sentences) that relates to this feeling.`;
+            callGemini(prompt, document.getElementById('mood-gemini-button'), document.getElementById('mood-gemini-result'));
+        }
+        function generateRecipe() {
+            const ingredients = document.getElementById('ingredients-text').value;
+            if (ingredients.trim().length < 5) {
+                document.getElementById('recipe-gemini-result').classList.remove('hidden');
+                document.getElementById('recipe-gemini-result').innerHTML = `<p class="text-yellow-300 text-center">Please enter a few ingredients to get started.</p>`;
+                return;
+            }
+            const prompt = `Act as a creative chef and a knowledgeable nutritionist. I have the following ingredients: ${ingredients}. Create a simple and delicious recipe for me. Provide a catchy **Recipe Title**, a list of **Ingredients** (including the ones I provided), and step-by-step **Instructions**. After the recipe, provide an **Estimated Nutritional Information** section, including the total calorie count, and approximate values for Protein, Carbohydrates, and Fats. Format your response clearly using markdown with bold headings for each section.`;
+            callGemini(prompt, document.getElementById('recipe-gemini-button'), document.getElementById('recipe-gemini-result'));
+        }
+
+        // --- Unit Converter Logic ---
+        const conversions = {
+            Length: { 'Meters (m)': 1, 'Kilometers (km)': 1000, 'Centimeters (cm)': 0.01, 'Feet (ft)': 0.3048, 'Inches (in)': 0.0254 },
+            Weight: { 'Kilograms (kg)': 1, 'Grams (g)': 0.001, 'Pounds (lb)': 0.453592, 'Ounces (oz)': 0.0283495 },
+            Temperature: { 'Celsius (°C)': 'c', 'Fahrenheit (°F)': 'f', 'Kelvin (K)': 'k' }
+        };
+        function updateConverter() {
+            const type = document.getElementById('conversion-type').value;
+            const fromSelect = document.getElementById('from-unit');
+            const toSelect = document.getElementById('to-unit');
+            fromSelect.innerHTML = ''; toSelect.innerHTML = '';
+            Object.keys(conversions[type]).forEach(unit => {
+                fromSelect.innerHTML += `<option value="${unit}">${unit}</option>`;
+                toSelect.innerHTML += `<option value="${unit}">${unit}</option>`;
+            });
+            if (toSelect.options.length > 1) { toSelect.selectedIndex = 1; }
+            convertUnits();
+        }
+        function convertUnits() {
+            const type = document.getElementById('conversion-type').value;
+            const fromUnit = document.getElementById('from-unit').value;
+            const toUnit = document.getElementById('to-unit').value;
+            const inputValue = parseFloat(document.getElementById('input-value').value) || 0;
+            const resultDiv = document.getElementById('converter-result');
+            let result = 0;
+            if (type === 'Temperature') {
+                if (fromUnit === toUnit) { result = inputValue; }
+                else {
+                    let tempInC = 0;
+                    if (fromUnit === 'Fahrenheit (°F)') tempInC = (inputValue - 32) * 5/9;
+                    else if (fromUnit === 'Kelvin (K)') tempInC = inputValue - 273.15;
+                    else tempInC = inputValue;
+                    if (toUnit === 'Fahrenheit (°F)') result = (tempInC * 9/5) + 32;
+                    else if (toUnit === 'Kelvin (K)') result = tempInC + 273.15;
+                    else result = tempInC;
+                }
+            } else {
+                const valueInBase = inputValue * conversions[type][fromUnit];
+                result = valueInBase / conversions[type][toUnit];
+            }
+            resultDiv.textContent = result.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+        
+        // --- Initial Load ---
+        window.onload = () => {
+            const conversionTypeSelect = document.getElementById('conversion-type');
+            Object.keys(conversions).forEach(type => {
+                conversionTypeSelect.innerHTML += `<option value="${type}">${type}</option>`;
+            });
+            document.getElementById('mood-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            updateConverter();
+            loadMoodHistory();
+        };
+    </script>
+</body>
+</html>
+
+
